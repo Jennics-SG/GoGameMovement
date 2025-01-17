@@ -19,9 +19,10 @@ var (
 	bgColor = color.RGBA{50, 100, 50, 50}
 )
 
-// Class variables
+// Game Class =================================================================
 type Game struct {
-	cache AssetCache
+	cache  AssetCache
+	player Player
 }
 
 // Constructor
@@ -33,6 +34,12 @@ func NewGame() *Game {
 func (g *Game) Init() {
 	// Load player sprite
 	g.cache.addAsset("assets/player.png")
+
+	// Create player
+	g.player = *NewPlayer(
+		*g.cache.assets[0],
+		SCREEN_WIDTH/2, SCREEN_HEIGHT/2,
+	)
 }
 
 // Get screen dims
@@ -42,10 +49,15 @@ func (g *Game) Layout(outsideWidth, insideWidth int) (screenWidth, screenHeight 
 
 // Update logic of game
 func (g *Game) Update() error {
+	g.player.Update()
 	return nil
 }
 
 // Draw to game screen
 func (g *Game) Draw(screen *ebiten.Image) {
 	screen.Fill(bgColor)
+
+	g.player.Draw(screen)
 }
+
+// ============================================================================
