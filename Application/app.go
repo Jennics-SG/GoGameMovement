@@ -1,4 +1,4 @@
-package MovementGame
+package app
 
 import (
 	"image/color"
@@ -15,7 +15,9 @@ var (
 	bgColor = color.RGBA{50, 100, 50, 50}
 )
 
-type Game struct{}
+type Game struct {
+	input Input
+}
 
 func NewGame() *Game {
 	return &Game{}
