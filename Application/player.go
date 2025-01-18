@@ -3,6 +3,7 @@
 package app
 
 import (
+	"log"
 	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -27,10 +28,10 @@ type Player struct {
 	pos          vector.MutableVector // Player position
 	dims         vector.Vector        // Player dimensions
 	rotSpeed     int                  // Speed of rotation in degrees
-	maxSpeed     int                  // Maximum speed of player
-	acceleration int                  // Player acceleration
+	acceleration float64              // Player acceleration
+	maxSpeed     float64              // Maximum speed of player
 	rotation     float64              // Current rotation of player in radians
-	velocity     int                  // Current speed of player
+	velocity     float64              // Current speed of player
 	scale        float64              // Scale of player
 }
 
@@ -43,7 +44,7 @@ func NewPlayer(sprite ebiten.Image, x, y float64) *Player {
 		pos:          vector.MutableVector{x, y},
 		dims:         vector.Vector{float64(w), float64(h)},
 		rotSpeed:     5,
-		maxSpeed:     5,
+		maxSpeed:     15,
 		acceleration: 1,
 		rotation:     0,
 		velocity:     0,
@@ -64,9 +65,10 @@ func (p *Player) Draw(screen *ebiten.Image) {
 	// Rotate player
 	p.Rotate(op)
 
+	op.GeoM.Scale(p.scale, p.scale)
+
 	// Now the rotation is done we can move the player to where we want it to be
 	op.GeoM.Translate(xPos, yPos)
-	op.GeoM.Scale(p.scale, p.scale)
 
 	screen.DrawImage(&p.sprite, op)
 }
@@ -79,24 +81,40 @@ func (p *Player) Update() {
 	if ebiten.IsKeyPressed(ebiten.KeyD) {
 		p.rotation += degToRad(float64(p.rotSpeed))
 	}
-	if ebiten.IsKeyPressed(ebiten.KeyW) {
+	if ebiten.IsKeyPressed(ebiten.KeyW) && p.velocity <= p.maxSpeed {
 		p.velocity += p.acceleration
 	} else if p.velocity != 0 {
-		p.velocity -= p.acceleration
+		p.velocity -= p.acceleration / 10
 	}
 	if p.velocity <= 0 {
 		p.velocity = 0
 	}
 
 	// Move player in direction being faced
-	xChange := float64(p.velocity) * math.Sin(p.rotation)
-	yChange := float64(p.velocity) * math.Cos(p.rotation)
+	deltaX := float64(p.velocity) * math.Sin(p.rotation)
+	deltaY := float64(p.velocity) * math.Cos(p.rotation)
 
-	p.pos = vector.MutableVector{
-		p.pos.X() + xChange,
-		p.pos.Y() - yChange,
+	// Make player teleport to other side of screen if out of bounds
+	newX := p.pos.X() + deltaX
+	newY := p.pos.Y() - deltaY
+
+	if newX >= SCREEN_WIDTH+p.dims.X() {
+		newX = 0
+	} else if newX <= 0 {
+		newX = SCREEN_WIDTH + p.dims.X()
+	}
+	if newY >= SCREEN_HEIGHT+p.dims.Y() {
+		newY = 0
+	} else if newY <= 0 {
+		newY = SCREEN_HEIGHT
 	}
 
+	p.pos = vector.MutableVector{
+		newX,
+		newY,
+	}
+
+	log.Printf("CURRENT SPEED: %v\n", p.velocity)
 }
 
 func (p *Player) OffsetToCenter() (x, y float64) {
