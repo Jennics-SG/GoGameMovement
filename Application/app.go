@@ -33,11 +33,11 @@ func NewGame() *Game {
 // Initialise game
 func (g *Game) Init() {
 	// Load player sprite
-	g.cache.addAsset("assets/player.png")
+	g.cache.addAsset("assets/player.png", "player")
 
 	// Create player
 	g.player = *NewPlayer(
-		*g.cache.assets[0],
+		*g.cache.find("player"),
 		SCREEN_WIDTH/2, SCREEN_HEIGHT/2,
 	)
 }
