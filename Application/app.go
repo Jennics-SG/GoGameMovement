@@ -8,17 +8,17 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-// Game constants
+// VARIABLES ==================================================================
 const (
 	SCREEN_WIDTH  = 600
 	SCREEN_HEIGHT = 600
 )
 
-// Globals
 var (
 	bgColor = color.RGBA{50, 100, 50, 50}
 )
 
+// ============================================================================
 // Game Class =================================================================
 type Game struct {
 	cache  AssetCache
